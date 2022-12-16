@@ -14,8 +14,6 @@ fun main() {
 
 class KLox {
 
-    var hadError = false
-
     @Throws(IOException::class)
     fun main(args: Array<String>) {
         if (args.size > 1) {
@@ -60,12 +58,15 @@ class KLox {
         }
     }
 
-    fun error(line: Int, message: String) {
-        report(line, "", message)
-    }
+    companion object {
+        var hadError = false
+        fun error(line: Int, message: String) {
+            report(line, "", message)
+        }
 
-    fun report(line: Int, where: String, message: String) {
-        println("[line $line] Error $where: $message")
-        hadError = true
+        fun report(line: Int, where: String, message: String) {
+            println("[line $line] Error $where: $message")
+            hadError = true
+        }
     }
 }
