@@ -37,4 +37,3 @@ class Unary(val operator: Token, val right: Expr) : Expr() {
 		return visitor.visitUnaryExpr(this)
 	}
 }
-

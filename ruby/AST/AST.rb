@@ -24,7 +24,6 @@ astDefinitions = [
   "Unary     ; val operator: Token, val right: Expr"
 ]
 
-
 path = File.expand_path("../../src/main/kotlin/Expr.kt")
 File::open(path, mode='w') do |file|
   file.write("abstract class #{$basename}() {\n\n")
@@ -38,8 +37,5 @@ File::open(path, mode='w') do |file|
     fields = definitions[1].strip
     defineType(file, className, fields)
   end
-
-
-
 
 end

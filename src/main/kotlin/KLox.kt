@@ -4,6 +4,7 @@ import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.math.exp
 import kotlin.system.exitProcess
 
 fun main() {
@@ -52,16 +53,27 @@ class KLox {
     fun run(source: String) {
         val scanner = Scanner(source)
         val tokens = scanner.scanTokens()
+        val parser = Parser(tokens)
+        val expression = parser.parse()
 
-        for (token in tokens) {
-            println(token)
-        }
+        if (hadError) return
+
+        val astPrinter = ASTPrinter()
+        println(astPrinter.print(expression!!))
     }
 
     companion object {
         var hadError = false
         fun error(line: Int, message: String) {
             report(line, "", message)
+        }
+
+        fun error(token: Token, message: String) {
+            if (token.type == TokenType.EOF) {
+                report(token.line, " at end", message)
+            } else {
+                report(token.line, " at '${token.lexeme}'", message)
+            }
         }
 
         fun report(line: Int, where: String, message: String) {
