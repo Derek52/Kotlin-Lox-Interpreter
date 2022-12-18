@@ -39,3 +39,5 @@ File::open(path, mode='w') do |file|
   end
 
 end
+
+exit()
