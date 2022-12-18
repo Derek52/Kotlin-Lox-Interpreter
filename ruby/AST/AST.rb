@@ -19,23 +19,22 @@ def defineVisitor(file, basename, types)
     else
       file.write("\t\tfun visit#{typename}#{basename}(#{basename.downcase}: #{typename}) : R\n")
     end
-
-
   end
   file.write("\t}\n\n")
 end
 
 
 exprASTDefinitions = [
+  "Assign     ; val name: Token, val value: Expr",
   "Unary      ; val operator: Token, val right: Expr",
   "Binary     ; val left: Expr, val operator: Token, val right: Expr",
   "Grouping   ; val expression: Expr",
   "Literal    ; val value: Any?",
   "Variable   ; val name: Token"
-
 ]
 
 stmtASTDefinitions = [
+  "Block      ; val statements: List<Stmt>",
   "Expression ; val expression: Expr",
   "Var        ; val name: Token, val initializer: Expr",
   "Print      ; val expression: Expr"
@@ -62,5 +61,3 @@ end
 
 writeASTFile("Expr", exprASTDefinitions)
 writeASTFile("Stmt", stmtASTDefinitions)
-
-exit

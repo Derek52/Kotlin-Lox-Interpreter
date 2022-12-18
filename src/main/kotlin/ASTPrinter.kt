@@ -48,6 +48,10 @@ class ASTPrinter : Expr.Visitor<String> {
         return parenthesize(expr.name.toString())
     }
 
+    override fun visitAssignExpr(expr: Assign): String {
+        return expr.name.toString()
+    }
+
     override fun visitUnaryExpr(expr: Unary): String {
         return parenthesize(expr.operator.lexeme, expr.right)
     }

@@ -3,7 +3,7 @@ import kotlin.math.exp
 
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
-    val environment = Environment()
+    var environment = Environment()
 
     fun interpret(statements: List<Stmt>) {
         try {
@@ -21,6 +21,12 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
     override fun visitVariableExpr(expr: Variable): Any? {
         return environment.get(expr.name)
+    }
+
+    override fun visitAssignExpr(expr: Assign): Any? {
+        val value = evaluate(expr.value)
+        environment.assign(expr.name, value)
+        return value
     }
 
     override fun visitUnaryExpr(expr: Unary): Any? {
@@ -99,6 +105,11 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         return evaluate(expr.expression)
     }
 
+    override fun visitBlockStmt(stmt: BlockStmt): Void? {
+        executeBlock(stmt.statements, Environment(environment))
+        return null
+    }
+
     override fun visitExpressionStmt(stmt: ExpressionStmt) : Void? {
         evaluate(stmt.expression)
         return null
@@ -122,6 +133,19 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
     fun execute(stmt: Stmt) {
         stmt.accept(this)
+    }
+
+    fun executeBlock(statements: List<Stmt>, environment: Environment) {
+        val previous = this.environment
+        try {
+            this.environment = environment
+
+            for (stmt in statements) {
+                execute(stmt)
+            }
+        } finally {
+            this.environment = previous
+        }
     }
 
     fun evaluate(expr: Expr) : Any? {

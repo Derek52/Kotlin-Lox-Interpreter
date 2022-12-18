@@ -22,7 +22,6 @@ class Parser(val tokens: List<Token>) {
 
     fun match(vararg types: TokenType) : Boolean {
         for (type in types) {
-            println("Attempting to match ${type.name}")
             if (check(type)) {
                 advance()
                 return true
@@ -110,6 +109,7 @@ class Parser(val tokens: List<Token>) {
             return statement()
         } catch (error : ParseError) {
             synchronize()
+            //return PrintStmt(Literal(24))
             return null
         }
     }
@@ -127,11 +127,12 @@ class Parser(val tokens: List<Token>) {
     }
 
     fun expression() : Expr {
-        return equality()
+        return assignment()
     }
 
     fun statement() : Stmt {
         if (match(PRINT)) return printStatement()
+        if (match(LEFT_BRACE)) return BlockStmt(block())
         return expressionStatement()
     }
 
@@ -139,6 +140,31 @@ class Parser(val tokens: List<Token>) {
         val expr = expression()
         consume(SEMICOLON, "Expect ';' after expression")
         return ExpressionStmt(expr)
+    }
+
+    fun block() : List<Stmt> {
+        val statements = ArrayList<Stmt>()
+        while(!check(RIGHT_BRACE) && isNotAtEnd()) {
+            statements.add(declaration()!!)
+        }
+        consume(RIGHT_BRACE, "Expect '}' after block.")
+        return statements
+    }
+
+    fun assignment() : Expr {
+        var expr = equality()
+
+        if (match(EQUAL)) {
+            val equals = previous()
+            val value = assignment()
+
+            if (expr is Variable) {
+                val name : Token = expr.name
+                return Assign(name, value)
+            }
+            error(equals, "Invalid assignment target.")
+        }
+        return expr
     }
 
     fun printStatement() : Stmt {
