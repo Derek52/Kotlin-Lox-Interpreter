@@ -9,7 +9,6 @@ import kotlin.system.exitProcess
 
 fun main() {
     val klox = KLox()
-    println("Hola")
     klox.main(arrayOf())
 }
 
@@ -57,11 +56,16 @@ class KLox {
         val scanner = Scanner(source)
         val tokens = scanner.scanTokens()
         val parser = Parser(tokens)
-        val expression = parser.parse()
+        val statements = parser.parse()
 
+        /*val astPrinter = ASTPrinter()
+        for (token in tokens) {
+            println(token)
+        }
+*/
         if (hadError) return
 
-        interpreter.interpret(expression!!)
+        interpreter.interpret(statements)
     }
 
     companion object {

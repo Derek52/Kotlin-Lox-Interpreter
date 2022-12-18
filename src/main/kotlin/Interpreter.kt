@@ -1,11 +1,15 @@
 import TokenType.*
+import kotlin.math.exp
 
-class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void> {
+class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
-    fun interpret(expression: Expr) {
+    val environment = Environment()
+
+    fun interpret(statements: List<Stmt>) {
         try {
-            val value = evaluate(expression)
-            println(stringify(value))
+            for (stmt in statements) {
+                execute(stmt)
+            }
         } catch (error: RuntimeError) {
             KLox.runtimeError(error)
         }
@@ -13,6 +17,10 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void> {
 
     override fun visitLiteralExpr(expr: Literal): Any? {
         return expr.value
+    }
+
+    override fun visitVariableExpr(expr: Variable): Any? {
+        return environment.get(expr.name)
     }
 
     override fun visitUnaryExpr(expr: Unary): Any? {
@@ -51,6 +59,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void> {
                 if (left is String && right is String) {
                     return (left + right) as String
                 }
+
                 throw RuntimeError(expr.operator, "Both operands must be numbers or strings")
             }
 
@@ -90,12 +99,29 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void> {
         return evaluate(expr.expression)
     }
 
-    override fun visitExpressionStmt(stmt: ExpressionStmt): Any? {
-
+    override fun visitExpressionStmt(stmt: ExpressionStmt) : Void? {
+        evaluate(stmt.expression)
+        return null
     }
 
-    override fun visitPrintStmt(stmt: PrintStmt): Any? {
-        TODO("Not yet implemented")
+    override fun visitVarStmt(stmt: VarStmt): Void? {
+        if(stmt.initializer == null) {
+            environment.define(stmt.name.lexeme, null)
+        } else {
+            val value = evaluate(stmt.initializer)
+            environment.define(stmt.name.lexeme, value)
+        }
+        return null
+    }
+
+    override fun visitPrintStmt(stmt: PrintStmt) : Void? {
+        val value = evaluate(stmt.expression)
+        println(stringify(value))
+        return null
+    }
+
+    fun execute(stmt: Stmt) {
+        stmt.accept(this)
     }
 
     fun evaluate(expr: Expr) : Any? {

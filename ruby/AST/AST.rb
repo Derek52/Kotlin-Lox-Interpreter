@@ -31,7 +31,7 @@ exprASTDefinitions = [
   "Binary     ; val left: Expr, val operator: Token, val right: Expr",
   "Grouping   ; val expression: Expr",
   "Literal    ; val value: Any?",
-  "Variable   ; name: Token"
+  "Variable   ; val name: Token"
 
 ]
 

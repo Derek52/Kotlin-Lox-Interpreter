@@ -1,21 +1,28 @@
 import TokenType.*
-import java.lang.RuntimeException
 
 class Parser(val tokens: List<Token>) {
     class ParseError : RuntimeException()
 
     var current = 0
 
-    fun parse() : Expr? {
-        try {
-            return expression()
-        } catch(error : ParseError) {
-            return null
+    fun parse() : List<Stmt> {
+        val statements = ArrayList<Stmt>()
+        while(isNotAtEnd()) {
+            if (declaration() == null) {
+                KLox.error(0, "declaration was null")
+            } else {
+                val statement = declaration()
+                statement?.let {
+                    statements.add(it)
+                }
+            }
         }
+        return statements
     }
 
     fun match(vararg types: TokenType) : Boolean {
         for (type in types) {
+            println("Attempting to match ${type.name}")
             if (check(type)) {
                 advance()
                 return true
@@ -74,12 +81,16 @@ class Parser(val tokens: List<Token>) {
     }
 
     fun primary() : Expr {
-        if(match(TRUE)) return Literal(true)
-        if(match(FALSE)) return Literal(false)
-        if(match(NIL)) return Literal(null)
+        if (match(TRUE)) return Literal(true)
+        if (match(FALSE)) return Literal(false)
+        if (match(NIL)) return Literal(null)
 
-        if(match(NUMBER, STRING)) {
+        if (match(NUMBER, STRING)) {
             return Literal(previous().literal)
+        }
+
+        if (match(IDENTIFIER)) {
+            return Variable(previous())
         }
 
         if (match(LEFT_PAREN)) {
@@ -91,8 +102,49 @@ class Parser(val tokens: List<Token>) {
         throw error(peek(), "Expect expression.")
     }
 
+    fun declaration() : Stmt? {
+        try {
+            if (match(VAR)) {
+                return varDeclaration()
+            }
+            return statement()
+        } catch (error : ParseError) {
+            synchronize()
+            return null
+        }
+    }
+
+    fun varDeclaration() : Stmt {
+        val name = consume(IDENTIFIER, "Expect variable name.")
+
+        var initializer : Expr? = null
+        if (match(EQUAL)) {
+            initializer = expression() as Literal
+        }
+
+        consume(SEMICOLON, "Expect ';' after variable declaration")
+        return VarStmt(name, initializer!!)
+    }
+
     fun expression() : Expr {
         return equality()
+    }
+
+    fun statement() : Stmt {
+        if (match(PRINT)) return printStatement()
+        return expressionStatement()
+    }
+
+    fun expressionStatement() : Stmt {
+        val expr = expression()
+        consume(SEMICOLON, "Expect ';' after expression")
+        return ExpressionStmt(expr)
+    }
+
+    fun printStatement() : Stmt {
+        val value = expression()
+        consume(SEMICOLON, "Expect ';' after value")
+        return PrintStmt(value)
     }
 
     fun check(type: TokenType) : Boolean {
@@ -117,7 +169,6 @@ class Parser(val tokens: List<Token>) {
     fun previous() : Token {
         return tokens[current - 1]
     }
-
 
 
     fun error(token: Token, message: String) : ParseError {
