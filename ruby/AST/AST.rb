@@ -27,14 +27,17 @@ end
 
 
 exprASTDefinitions = [
+  "Unary      ; val operator: Token, val right: Expr",
   "Binary     ; val left: Expr, val operator: Token, val right: Expr",
   "Grouping   ; val expression: Expr",
   "Literal    ; val value: Any?",
-  "Unary      ; val operator: Token, val right: Expr"
+  "Variable   ; name: Token"
+
 ]
 
 stmtASTDefinitions = [
   "Expression ; val expression: Expr",
+  "Var        ; val name: Token, val initializer: Expr",
   "Print      ; val expression: Expr"
 ]
 
