@@ -1,6 +1,6 @@
 import TokenType.*
 
-class Interpreter : Expr.Visitor<Any?> {
+class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void> {
 
     fun interpret(expression: Expr) {
         try {
@@ -90,6 +90,14 @@ class Interpreter : Expr.Visitor<Any?> {
         return evaluate(expr.expression)
     }
 
+    override fun visitExpressionStmt(stmt: ExpressionStmt): Any? {
+
+    }
+
+    override fun visitPrintStmt(stmt: PrintStmt): Any? {
+        TODO("Not yet implemented")
+    }
+
     fun evaluate(expr: Expr) : Any? {
         return expr.accept(this)
     }
@@ -133,5 +141,4 @@ class Interpreter : Expr.Visitor<Any?> {
     fun isNotTruthy(value: Any?) : Boolean {
         return !isTruthy(value)
     }
-
 }

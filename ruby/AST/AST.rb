@@ -1,5 +1,9 @@
 def defineType(file, className, basename, fieldList)
-  file.write("class #{className}(#{fieldList}) : #{basename}() {\n\n")
+  if basename == "Stmt"
+    file.write("class #{className+basename}(#{fieldList}) : #{basename}() {\n\n")
+  else
+    file.write("class #{className}(#{fieldList}) : #{basename}() {\n\n")
+  end
   file.write("\toverride fun <R> accept(visitor: Visitor<R>) : R {\n")
   file.write("\t\treturn visitor.visit#{className}#{basename}(this)\n")
   file.write("\t}\n}\n\n")
@@ -10,10 +14,17 @@ def defineVisitor(file, basename, types)
   types.each do |type|
     info = type.split(';')
     typename = info[0].strip
-    file.write("\t\tfun visit#{typename}#{basename}(#{basename.downcase}: #{typename}) : R\n")
+    if basename == "Stmt"
+      file.write("\t\tfun visit#{typename}#{basename}(#{basename.downcase}: #{typename+basename}) : R\n")
+    else
+      file.write("\t\tfun visit#{typename}#{basename}(#{basename.downcase}: #{typename}) : R\n")
+    end
+
+
   end
   file.write("\t}\n\n")
 end
+
 
 exprASTDefinitions = [
   "Binary     ; val left: Expr, val operator: Token, val right: Expr",
