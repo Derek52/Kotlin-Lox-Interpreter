@@ -105,60 +105,12 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         return evaluate(expr.expression)
     }
 
-    override fun visitBlockStmt(stmt: BlockStmt): Void? {
-        executeBlock(stmt.statements, Environment(environment))
-        return null
-    }
-
-    override fun visitExpressionStmt(stmt: ExpressionStmt) : Void? {
-        evaluate(stmt.expression)
-        return null
-    }
-
-    override fun visitVarStmt(stmt: VarStmt): Void? {
-        if(stmt.initializer == null) {
-            environment.define(stmt.name.lexeme, null)
-        } else {
-            val value = evaluate(stmt.initializer)
-            environment.define(stmt.name.lexeme, value)
-        }
-        return null
-    }
-
-    override fun visitPrintStmt(stmt: PrintStmt) : Void? {
-        val value = evaluate(stmt.expression)
-        println(stringify(value))
-        return null
-    }
-
-    fun execute(stmt: Stmt) {
-        stmt.accept(this)
-    }
-
-    fun executeBlock(statements: List<Stmt>, environment: Environment) {
-        val previous = this.environment
-        try {
-            this.environment = environment
-
-            for (stmt in statements) {
-                execute(stmt)
-            }
-        } finally {
-            this.environment = previous
-        }
-    }
-
     fun evaluate(expr: Expr) : Any? {
         return expr.accept(this)
     }
 
     fun execute(stmt: Stmt) {
         stmt.accept(this)
-    }
-
-    override fun visitBlockStmt(stmt: BlockStmt): Void? {
-        executeBlock(stmt.statements, Environment(environment))
-        return null
     }
 
     fun executeBlock(statements: List<Stmt>, environment: Environment) {
@@ -174,8 +126,13 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         }
     }
 
-    override fun visitExpressionStmt(stmt: ExpressionStmt): Void? {
+    override fun visitExpressionStmt(stmt: ExpressionStmt) : Void? {
         evaluate(stmt.expression)
+        return null
+    }
+
+    override fun visitBlockStmt(stmt: BlockStmt): Void? {
+        executeBlock(stmt.statements, Environment(environment))
         return null
     }
 
