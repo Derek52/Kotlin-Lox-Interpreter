@@ -33,6 +33,10 @@ class ASTPrinter : Expr.Visitor<String> {
         return parenthesize(expr.operator.lexeme, expr.left,  expr.right)
     }
 
+    override fun visitLogicalExpr(expr: Logical): String {
+        return parenthesize(expr.operator.lexeme)
+    }
+
     override fun visitGroupingExpr(expr: Grouping): String {
         return parenthesize("group", expr.expression)
     }

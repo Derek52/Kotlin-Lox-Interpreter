@@ -4,6 +4,7 @@ abstract class Stmt() {
 		fun visitBlockStmt(stmt: BlockStmt) : R
 		fun visitExpressionStmt(stmt: ExpressionStmt) : R
 		fun visitVarStmt(stmt: VarStmt) : R
+		fun visitIfStmt(stmt: IfStmt) : R
 		fun visitPrintStmt(stmt: PrintStmt) : R
 	}
 
@@ -28,6 +29,13 @@ class VarStmt(val name: Token, val initializer: Expr?) : Stmt() {
 
 	override fun <R> accept(visitor: Visitor<R>) : R {
 		return visitor.visitVarStmt(this)
+	}
+}
+
+class IfStmt(val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt?) : Stmt() {
+
+	override fun <R> accept(visitor: Visitor<R>) : R {
+		return visitor.visitIfStmt(this)
 	}
 }
 

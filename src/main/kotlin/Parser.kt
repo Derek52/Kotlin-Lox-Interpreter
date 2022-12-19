@@ -1,5 +1,6 @@
 import TokenType.*
 import java.lang.RuntimeException
+import kotlin.math.exp
 
 class Parser(val tokens: List<Token>) {
     class ParseError : RuntimeException()
@@ -110,10 +111,24 @@ class Parser(val tokens: List<Token>) {
     }
 
     fun statement() : Stmt {
+        if (match(IF)) return ifStatement()
         if (match(PRINT)) return printStatement()
         if (match(LEFT_BRACE)) return BlockStmt(block())
 
         return expressionStatement()
+    }
+
+    fun ifStatement() : Stmt {
+        consume(LEFT_PAREN, "Expect '(' after 'if'.")
+        val condition = expression()
+
+        val thenBranch = statement()
+        var elseBranch: Stmt? = null
+        if (match(ELSE)) {
+            elseBranch = statement()
+        }
+
+        return IfStmt(condition, thenBranch, elseBranch)
     }
 
     fun block() : List<Stmt> {
@@ -134,7 +149,7 @@ class Parser(val tokens: List<Token>) {
     }
 
     fun assignment(): Expr {
-        val expr = equality()
+        val expr = or()
 
         if (match(EQUAL)) {
             val equals = previous()
@@ -148,6 +163,28 @@ class Parser(val tokens: List<Token>) {
             error(equals, "Invalid assignment target.")
         }
 
+        return expr
+    }
+
+    fun or() : Expr {
+        var expr = and()
+
+        while (match(OR)) {
+            val operator = previous()
+            val right = and()
+            expr = Logical(expr, operator, right)
+        }
+        return expr
+    }
+
+    fun and() : Expr {
+        var expr = equality()
+
+        while (match(AND)) {
+            val operator = previous()
+            val right = equality()
+            expr = Logical(expr, operator, right)
+        }
         return expr
     }
 

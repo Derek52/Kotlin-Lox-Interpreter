@@ -26,17 +26,19 @@ end
 
 exprASTDefinitions = [
   "Assign     ; val name: Token, val value: Expr",
-  "Unary      ; val operator: Token, val right: Expr",
   "Binary     ; val left: Expr, val operator: Token, val right: Expr",
+  "Logical    ; val left: Expr, val operator: Token, val right: Expr",
   "Grouping   ; val expression: Expr",
   "Literal    ; val value: Any?",
+  "Unary      ; val operator: Token, val right: Expr",
   "Variable   ; val name: Token"
 ]
 
 stmtASTDefinitions = [
   "Block      ; val statements: List<Stmt>",
   "Expression ; val expression: Expr",
-  "Var        ; val name: Token, val initializer: Expr",
+  "Var        ; val name: Token, val initializer: Expr?",
+  "If         ; val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt?",
   "Print      ; val expression: Expr"
 ]
 

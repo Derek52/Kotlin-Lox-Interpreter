@@ -101,6 +101,18 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         return null
     }
 
+    override fun visitLogicalExpr(expr: Logical): Any? {
+        val left = evaluate(expr.left)
+
+        if (expr.operator.type == OR) {
+            if (isTruthy(left)) return left
+        } else { //expr.operator.type == AND
+            if (isNotTruthy(left)) return left
+        }
+
+        return evaluate(expr.right)
+    }
+
     override fun visitGroupingExpr(expr: Grouping): Any? {
         return evaluate(expr.expression)
     }
@@ -142,6 +154,17 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
             value = evaluate(stmt.initializer)
         }
         environment.define(stmt.name.lexeme, value)
+        return null
+    }
+
+    override fun visitIfStmt(stmt: IfStmt): Void? {
+        if (isTruthy(stmt.condition)) {
+            execute(stmt.thenBranch)
+        } else {
+            stmt.elseBranch?.let { elseBranch ->
+                execute(elseBranch)
+            }
+        }
         return null
     }
 
