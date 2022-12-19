@@ -59,6 +59,10 @@ class KLox {
         val parser = Parser(tokens)
         val expression = parser.parse()
 
+        for (token in tokens) {
+            println(token.type.name)
+        }
+
         if (hadError) return
 
         interpreter.interpret(expression!!)
