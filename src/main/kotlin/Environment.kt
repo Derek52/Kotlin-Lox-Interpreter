@@ -1,12 +1,15 @@
 class Environment(val enclosing: Environment? = null) {
-    val values = HashMap<String, Any?>()
+
+    val values: HashMap<String, Any?> = HashMap()
 
     fun define(name: String, value: Any?) {
         values[name] = value
     }
 
     fun get(name: Token) : Any? {
-        if (values.contains(name.lexeme)) return values[name.lexeme]
+        if (values.contains(name.lexeme)) {
+            return values[name.lexeme]
+        }
 
         enclosing?.let { outerScope ->
             return outerScope.get(name)
@@ -25,6 +28,7 @@ class Environment(val enclosing: Environment? = null) {
             outerScope.assign(name, value)
         }
 
-        throw RuntimeError(name, "Undefined variable '${name.lexeme}'.")
+        throw RuntimeError(name, "Attempted to assign value to Undefined variable '${name.lexeme}'.")
     }
+
 }

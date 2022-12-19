@@ -1,4 +1,5 @@
 import TokenType.*
+import java.lang.RuntimeException
 
 class Parser(val tokens: List<Token>) {
     class ParseError : RuntimeException()
@@ -7,15 +8,8 @@ class Parser(val tokens: List<Token>) {
 
     fun parse() : List<Stmt> {
         val statements = ArrayList<Stmt>()
-        while(isNotAtEnd()) {
-            if (declaration() == null) {
-                KLox.error(0, "declaration was null")
-            } else {
-                val statement = declaration()
-                statement?.let {
-                    statements.add(it)
-                }
-            }
+        while (isNotAtEnd()) {
+            statements.add(declaration()!!)
         }
         return statements
     }
@@ -80,11 +74,11 @@ class Parser(val tokens: List<Token>) {
     }
 
     fun primary() : Expr {
-        if (match(TRUE)) return Literal(true)
-        if (match(FALSE)) return Literal(false)
-        if (match(NIL)) return Literal(null)
+        if(match(TRUE)) return Literal(true)
+        if(match(FALSE)) return Literal(false)
+        if(match(NIL)) return Literal(null)
 
-        if (match(NUMBER, STRING)) {
+        if(match(NUMBER, STRING)) {
             return Literal(previous().literal)
         }
 
@@ -101,17 +95,64 @@ class Parser(val tokens: List<Token>) {
         throw error(peek(), "Expect expression.")
     }
 
+    fun expression() : Expr {
+        return assignment()
+    }
+
     fun declaration() : Stmt? {
         try {
-            if (match(VAR)) {
-                return varDeclaration()
-            }
+            if(match(VAR)) return varDeclaration()
             return statement()
         } catch (error : ParseError) {
             synchronize()
-            //return PrintStmt(Literal(24))
             return null
         }
+    }
+
+    fun statement() : Stmt {
+        if (match(PRINT)) return printStatement()
+        if (match(LEFT_BRACE)) return BlockStmt(block())
+
+        return expressionStatement()
+    }
+
+    fun block() : List<Stmt> {
+        val statements = ArrayList<Stmt>()
+
+        while(!check(RIGHT_BRACE)  && isNotAtEnd()) {
+            statements.add(declaration()!!)
+        }
+
+        consume(RIGHT_BRACE, "Expect '}' after block.")
+        return statements
+    }
+
+    fun expressionStatement() : Stmt {
+        val expr = expression()
+        consume(SEMICOLON, "Expect ';' after expression.")
+        return ExpressionStmt(expr)
+    }
+
+    fun assignment(): Expr {
+        val expr = equality()
+
+        if (match(EQUAL)) {
+            val equals = previous()
+            val value = assignment()
+
+            if (expr is Variable) {
+                val name = expr.name
+                return Assign(name, value)
+            }
+        }
+
+        return expr
+    }
+
+    fun printStatement() : Stmt {
+        val value = expression()
+        consume(SEMICOLON, "Expect ';' after value.")
+        return PrintStmt(value)
     }
 
     fun varDeclaration() : Stmt {
@@ -119,58 +160,11 @@ class Parser(val tokens: List<Token>) {
 
         var initializer : Expr? = null
         if (match(EQUAL)) {
-            initializer = expression() as Literal
+            initializer = expression()
         }
 
-        consume(SEMICOLON, "Expect ';' after variable declaration")
-        return VarStmt(name, initializer!!)
-    }
-
-    fun expression() : Expr {
-        return assignment()
-    }
-
-    fun statement() : Stmt {
-        if (match(PRINT)) return printStatement()
-        if (match(LEFT_BRACE)) return BlockStmt(block())
-        return expressionStatement()
-    }
-
-    fun expressionStatement() : Stmt {
-        val expr = expression()
-        consume(SEMICOLON, "Expect ';' after expression")
-        return ExpressionStmt(expr)
-    }
-
-    fun block() : List<Stmt> {
-        val statements = ArrayList<Stmt>()
-        while(!check(RIGHT_BRACE) && isNotAtEnd()) {
-            statements.add(declaration()!!)
-        }
-        consume(RIGHT_BRACE, "Expect '}' after block.")
-        return statements
-    }
-
-    fun assignment() : Expr {
-        var expr = equality()
-
-        if (match(EQUAL)) {
-            val equals = previous()
-            val value = assignment()
-
-            if (expr is Variable) {
-                val name : Token = expr.name
-                return Assign(name, value)
-            }
-            error(equals, "Invalid assignment target.")
-        }
-        return expr
-    }
-
-    fun printStatement() : Stmt {
-        val value = expression()
-        consume(SEMICOLON, "Expect ';' after value")
-        return PrintStmt(value)
+        consume(SEMICOLON, "Expect ';' after variable declaration.")
+        return VarStmt(name, initializer)
     }
 
     fun check(type: TokenType) : Boolean {
@@ -195,6 +189,7 @@ class Parser(val tokens: List<Token>) {
     fun previous() : Token {
         return tokens[current - 1]
     }
+
 
 
     fun error(token: Token, message: String) : ParseError {

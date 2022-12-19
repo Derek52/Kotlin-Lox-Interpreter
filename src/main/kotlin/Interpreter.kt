@@ -152,6 +152,48 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         return expr.accept(this)
     }
 
+    fun execute(stmt: Stmt) {
+        stmt.accept(this)
+    }
+
+    override fun visitBlockStmt(stmt: BlockStmt): Void? {
+        executeBlock(stmt.statements, Environment(environment))
+        return null
+    }
+
+    fun executeBlock(statements: List<Stmt>, environment: Environment) {
+        val previous = this.environment
+        try {
+            this.environment = environment
+
+            for (stmt in statements) {
+                execute(stmt)
+            }
+        } finally {
+            this.environment = previous;
+        }
+    }
+
+    override fun visitExpressionStmt(stmt: ExpressionStmt): Void? {
+        evaluate(stmt.expression)
+        return null
+    }
+
+    override fun visitVarStmt(stmt: VarStmt): Void? {
+        var value : Any? = null
+        stmt.initializer?.let {
+            value = evaluate(stmt.initializer)
+        }
+        environment.define(stmt.name.lexeme, value)
+        return null
+    }
+
+    override fun visitPrintStmt(stmt: PrintStmt): Void? {
+        val value = evaluate(stmt.expression)
+        println(stringify(value))
+        return null
+    }
+
     fun checkNumberOperand(operator: Token, operand: Any?) {
         if (operand is Double) return
         throw RuntimeError(operator, "Operand must be a number")
