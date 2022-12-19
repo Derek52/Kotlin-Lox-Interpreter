@@ -144,6 +144,8 @@ class Parser(val tokens: List<Token>) {
                 val name = expr.name
                 return Assign(name, value)
             }
+
+            error(equals, "Invalid assignment target.")
         }
 
         return expr
