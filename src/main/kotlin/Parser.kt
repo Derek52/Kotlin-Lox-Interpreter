@@ -1,5 +1,4 @@
 import TokenType.*
-import java.lang.RuntimeException
 import kotlin.math.exp
 
 class Parser(val tokens: List<Token>) {
@@ -111,11 +110,56 @@ class Parser(val tokens: List<Token>) {
     }
 
     fun statement() : Stmt {
+        if (match(FOR)) return forStatement()
         if (match(IF)) return ifStatement()
         if (match(PRINT)) return printStatement()
+        if (match(WHILE)) return whileStatement()
         if (match(LEFT_BRACE)) return BlockStmt(block())
 
         return expressionStatement()
+    }
+
+    fun forStatement() : Stmt {
+        consume(LEFT_PAREN, "Expect '(' after 'for'.")
+
+        var initializer: Stmt? = null
+        if (match(SEMICOLON)) {
+            initializer = null
+        } else if (match(VAR)) {
+            initializer = varDeclaration()
+        } else {
+            initializer = expressionStatement()
+        }
+
+        var condition: Expr? = null
+
+        if (!check(SEMICOLON)) {
+            condition = expression()
+        }
+        consume(SEMICOLON, "Expect ';' after for-loop condition.")
+
+
+        var increment: Expr? = null
+        if (!check(RIGHT_PAREN)) {
+            increment = expression()
+        }
+        consume(RIGHT_PAREN, "Expect ')' after loop condition.")
+
+        var body = statement()
+
+        increment?.let { inc ->
+            body = BlockStmt(listOf(body, ExpressionStmt(inc)))
+        }
+
+        if (condition == null) condition = Literal(true)
+
+        body = WhileStmt(condition, body)
+
+        initializer?.let {
+            body = BlockStmt(listOf(initializer, body))
+        }
+
+        return body
     }
 
     fun ifStatement() : Stmt {
@@ -129,6 +173,14 @@ class Parser(val tokens: List<Token>) {
         }
 
         return IfStmt(condition, thenBranch, elseBranch)
+    }
+
+    fun whileStatement() : Stmt {
+        consume(LEFT_PAREN, "Expect '(' after 'while'.")
+        val condition = expression()
+        consume(RIGHT_PAREN, "Expect ')' after condition.")
+        val body = statement()
+        return WhileStmt(condition, body)
     }
 
     fun block() : List<Stmt> {

@@ -174,6 +174,13 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         return null
     }
 
+    override fun visitWhileStmt(stmt: WhileStmt): Void? {
+        while(isTruthy(stmt.condition)) {
+            execute(stmt.body)
+        }
+        return null
+    }
+
     fun checkNumberOperand(operator: Token, operand: Any?) {
         if (operand is Double) return
         throw RuntimeError(operator, "Operand must be a number")

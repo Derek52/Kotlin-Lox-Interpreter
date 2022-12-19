@@ -39,7 +39,8 @@ stmtASTDefinitions = [
   "Expression ; val expression: Expr",
   "Var        ; val name: Token, val initializer: Expr?",
   "If         ; val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt?",
-  "Print      ; val expression: Expr"
+  "Print      ; val expression: Expr",
+  "While      ; val condition: Expr, val body: Stmt"
 ]
 
 
