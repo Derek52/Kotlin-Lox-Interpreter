@@ -112,8 +112,20 @@ class Parser(val tokens: List<Token>) {
 
     fun statement() : Stmt {
         if (match(PRINT)) return printStatement()
+        if (match(LEFT_BRACE)) return BlockStmt(block())
 
         return expressionStatement()
+    }
+
+    fun block() : List<Stmt> {
+        val statements = ArrayList<Stmt>()
+
+        while(!check(RIGHT_BRACE)  && isNotAtEnd()) {
+            statements.add(declaration()!!)
+        }
+
+        consume(RIGHT_BRACE, "Expect '}' after block.")
+        return statements
     }
 
     fun expressionStatement() : Stmt {
