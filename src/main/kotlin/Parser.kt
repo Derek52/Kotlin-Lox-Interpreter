@@ -165,6 +165,7 @@ class Parser(val tokens: List<Token>) {
     fun ifStatement() : Stmt {
         consume(LEFT_PAREN, "Expect '(' after 'if'.")
         val condition = expression()
+        consume(RIGHT_PAREN, "Expect ')' after if condition.")
 
         val thenBranch = statement()
         var elseBranch: Stmt? = null

@@ -12,7 +12,8 @@ class Environment(val enclosing: Environment? = null) {
         }
 
         enclosing?.let { outerScope ->
-            return outerScope.get(name)
+            val outerName = outerScope.get(name)
+            return outerName//outerScope.get(name)
         }
 
         throw RuntimeError(name, "Undefined variable '${name.lexeme}'.")
@@ -26,6 +27,7 @@ class Environment(val enclosing: Environment? = null) {
 
         enclosing?.let { outerScope ->
             outerScope.assign(name, value)
+            return
         }
 
         throw RuntimeError(name, "Attempted to assign value to Undefined variable '${name.lexeme}'.")

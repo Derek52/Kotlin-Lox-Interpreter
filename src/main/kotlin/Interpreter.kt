@@ -33,6 +33,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         val right = evaluate(expr.right)
 
         if (expr.operator.type == MINUS) {
+            checkNumberOperand(expr.operator, right)
             return right as Double * -1
         } else if (expr.operator.type == BANG) {
             return isNotTruthy(right)
@@ -158,7 +159,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
     }
 
     override fun visitIfStmt(stmt: IfStmt): Void? {
-        if (isTruthy(stmt.condition)) {
+        if (isTruthy(evaluate(stmt.condition))) {
             execute(stmt.thenBranch)
         } else {
             stmt.elseBranch?.let { elseBranch ->
@@ -175,7 +176,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
     }
 
     override fun visitWhileStmt(stmt: WhileStmt): Void? {
-        while(isTruthy(stmt.condition)) {
+        while(isTruthy(evaluate(stmt.condition))) {
             execute(stmt.body)
         }
         return null
