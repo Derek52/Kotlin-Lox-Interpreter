@@ -57,15 +57,16 @@ class KLox {
         val scanner = Scanner(source)
         val tokens = scanner.scanTokens()
         val parser = Parser(tokens)
-        val expression = parser.parse()
+        //val expression = parser.parse()
+        val statements = parser.parse()
 
-        for (token in tokens) {
-            println(token.type.name)
-        }
+        /*for (token in tokens) {
+            println(token)
+        }*/
 
         if (hadError) return
 
-        interpreter.interpret(expression!!)
+        interpreter.interpret(statements)
     }
 
     companion object {

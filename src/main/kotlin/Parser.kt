@@ -6,12 +6,12 @@ class Parser(val tokens: List<Token>) {
 
     var current = 0
 
-    fun parse() : Expr? {
-        try {
-            return expression()
-        } catch(error : ParseError) {
-            return null
+    fun parse() : List<Stmt> {
+        val statements = ArrayList<Stmt>()
+        while (isNotAtEnd()) {
+            statements.add(statement())
         }
+        return statements
     }
 
     fun match(vararg types: TokenType) : Boolean {
@@ -93,6 +93,24 @@ class Parser(val tokens: List<Token>) {
 
     fun expression() : Expr {
         return equality()
+    }
+
+    fun statement() : Stmt {
+        if (match(PRINT)) return printStatement()
+
+        return expressionStatement()
+    }
+
+    fun expressionStatement() : Stmt {
+        val expr = expression()
+        consume(SEMICOLON, "Expect ';' after expression.")
+        return ExpressionStmt(expr)
+    }
+
+    fun printStatement() : Stmt {
+        val value = expression()
+        consume(SEMICOLON, "Expect ';' after value.")
+        return PrintStmt(value)
     }
 
     fun check(type: TokenType) : Boolean {

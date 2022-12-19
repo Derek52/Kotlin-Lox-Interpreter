@@ -1,11 +1,12 @@
 import TokenType.*
 
-class Interpreter : Expr.Visitor<Any?> {
+class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
-    fun interpret(expression: Expr) {
+    fun interpret(statements: List<Stmt>) {
         try {
-            val value = evaluate(expression)
-            println(stringify(value))
+            for (stmt in statements) {
+                execute(stmt)
+            }
         } catch (error: RuntimeError) {
             KLox.runtimeError(error)
         }
@@ -13,6 +14,14 @@ class Interpreter : Expr.Visitor<Any?> {
 
     override fun visitLiteralExpr(expr: Literal): Any? {
         return expr.value
+    }
+
+    override fun visitVariableExpr(expr: Variable): Any? {
+        return null
+    }
+
+    override fun visitAssignExpr(expr: Assign): Any? {
+        TODO("Not yet implemented")
     }
 
     override fun visitUnaryExpr(expr: Unary): Any? {
@@ -92,6 +101,29 @@ class Interpreter : Expr.Visitor<Any?> {
 
     fun evaluate(expr: Expr) : Any? {
         return expr.accept(this)
+    }
+
+    fun execute(stmt: Stmt) {
+        stmt.accept(this)
+    }
+
+    override fun visitBlockStmt(stmt: BlockStmt): Void? {
+        TODO("Not yet implemented")
+    }
+
+    override fun visitExpressionStmt(stmt: ExpressionStmt): Void? {
+        evaluate(stmt.expression)
+        return null
+    }
+
+    override fun visitVarStmt(stmt: VarStmt): Void? {
+        TODO("Not yet implemented")
+    }
+
+    override fun visitPrintStmt(stmt: PrintStmt): Void? {
+        val value = evaluate(stmt.expression)
+        println(stringify(value))
+        return null
     }
 
     fun checkNumberOperand(operator: Token, operand: Any?) {

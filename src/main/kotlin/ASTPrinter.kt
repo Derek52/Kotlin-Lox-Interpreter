@@ -44,6 +44,14 @@ class ASTPrinter : Expr.Visitor<String> {
         return "nil"
     }
 
+    override fun visitVariableExpr(expr: Variable): String {
+        return ""
+    }
+
+    override fun visitAssignExpr(expr: Assign): String {
+        return ""
+    }
+
     override fun visitUnaryExpr(expr: Unary): String {
         return parenthesize(expr.operator.lexeme, expr.right)
     }
