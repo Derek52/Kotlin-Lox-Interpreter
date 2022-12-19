@@ -24,7 +24,7 @@ class ExpressionStmt(val expression: Expr) : Stmt() {
 	}
 }
 
-class VarStmt(val name: Token, val initializer: Expr) : Stmt() {
+class VarStmt(val name: Token, val initializer: Expr?) : Stmt() {
 
 	override fun <R> accept(visitor: Visitor<R>) : R {
 		return visitor.visitVarStmt(this)

@@ -2,6 +2,8 @@ import TokenType.*
 
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
+    val environment = Environment()
+
     fun interpret(statements: List<Stmt>) {
         try {
             for (stmt in statements) {
@@ -17,7 +19,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
     }
 
     override fun visitVariableExpr(expr: Variable): Any? {
-        return null
+        return environment.get(expr.name)
     }
 
     override fun visitAssignExpr(expr: Assign): Any? {
@@ -117,7 +119,12 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
     }
 
     override fun visitVarStmt(stmt: VarStmt): Void? {
-        TODO("Not yet implemented")
+        var value : Any? = null
+        stmt.initializer?.let {
+            value = evaluate(stmt.initializer)
+        }
+        environment.define(stmt.name.lexeme, value)
+        return null
     }
 
     override fun visitPrintStmt(stmt: PrintStmt): Void? {
