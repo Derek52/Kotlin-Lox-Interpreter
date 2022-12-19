@@ -4,18 +4,17 @@ import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.math.exp
 import kotlin.system.exitProcess
 
-fun main() {
+fun main(args: Array<String>) {
     val klox = KLox()
-    klox.main(arrayOf())
+    klox.klox(args)
 }
 
 class KLox {
 
     @Throws(IOException::class)
-    fun main(args: Array<String>) {
+    fun klox(args: Array<String>) {
         if (args.size > 1) {
             println("usage: Klox [script]")
             exitProcess(64)
