@@ -1,5 +1,6 @@
 import TokenType.*
 import java.lang.RuntimeException
+import javax.lang.model.element.VariableElement
 
 class Parser(val tokens: List<Token>) {
     class ParseError : RuntimeException()
@@ -96,7 +97,7 @@ class Parser(val tokens: List<Token>) {
     }
 
     fun expression() : Expr {
-        return equality()
+        return assignment()
     }
 
     fun declaration() : Stmt? {
@@ -119,6 +120,22 @@ class Parser(val tokens: List<Token>) {
         val expr = expression()
         consume(SEMICOLON, "Expect ';' after expression.")
         return ExpressionStmt(expr)
+    }
+
+    fun assignment(): Expr {
+        val expr = equality()
+
+        if (match(EQUAL)) {
+            val equals = previous()
+            val value = assignment()
+
+            if (expr is Variable) {
+                val name = expr.name
+                return Assign(name, value)
+            }
+        }
+
+        return expr
     }
 
     fun printStatement() : Stmt {
