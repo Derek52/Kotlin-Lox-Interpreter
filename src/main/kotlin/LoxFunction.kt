@@ -1,6 +1,6 @@
-class LoxFunction(val declaration: FunctionStmt) : LoxCallable {
+class LoxFunction(val declaration: FunctionStmt, val closure: Environment) : LoxCallable {
     override fun call(interpreter: Interpreter, arguments: List<Any?>): Any? {
-        val environment = Environment(interpreter.globals)
+        val environment = Environment(closure)
         for (i in declaration.params.indices) {
             environment.define(declaration.params[i].lexeme, arguments[i])
         }
