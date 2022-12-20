@@ -1,9 +1,25 @@
 import TokenType.*
-import kotlin.math.exp
 
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
-    var environment = Environment()
+    private val globals = Environment()
+    private var environment = globals
+
+    init {
+        globals.define("clock", object : LoxCallable {
+            override fun arity(): Int {
+                return 0
+            }
+
+            override fun call(interpreter: Interpreter?, arguments: List<Any?>): Any {
+                return System.currentTimeMillis().toDouble() / 1000.0
+            }
+
+            override fun toString(): String {
+                return "<native fn>"
+            }
+        })
+    }
 
     fun interpret(statements: List<Stmt>) {
         try {
@@ -100,6 +116,25 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         }
 
         return null
+    }
+
+    override fun visitCallExpr(expr: Call): Any? {
+        val callee = evaluate(expr.callee)
+
+        val arguments = ArrayList<Any?>()
+        for (arg in expr.arguments) {
+            arguments.add(evaluate(arg))
+        }
+
+        if (callee !is LoxCallable) {
+            throw RuntimeError(expr.paren, "Can only call functions and clssses.")
+        }
+
+        val function = callee as LoxCallable
+        if (arguments.size != function.arity()) {
+            throw RuntimeError(expr.paren, "Expected ${function.arity()} arguments but got ${arguments.size}.")
+        }
+        return function.call(this, arguments)
     }
 
     override fun visitLogicalExpr(expr: Logical): Any? {

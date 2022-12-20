@@ -70,7 +70,37 @@ class Parser(val tokens: List<Token>) {
             val right = unary()
             return Unary(operator, right)
         }
-        return primary()
+        return call()
+    }
+
+    fun call() : Expr {
+        var expr = primary()
+
+        while(true) {
+            if (match(LEFT_PAREN)) {
+                expr = finishCall(expr)
+            } else {
+                break;
+            }
+        }
+
+        return expr
+    }
+
+    fun finishCall(callee: Expr) : Expr {
+        val arguments = ArrayList<Expr>()
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (arguments.size >= 255) {
+                    error(peek(), "Can't have more than 255 arguments.")
+                }
+                arguments.add(expression())
+            } while (match(COMMA))
+        }
+
+
+        val paren = consume(RIGHT_PAREN, "Expect ')' after arguments.")
+        return Call(callee, paren, arguments)
     }
 
     fun primary() : Expr {
@@ -101,7 +131,8 @@ class Parser(val tokens: List<Token>) {
 
     fun declaration() : Stmt? {
         try {
-            if(match(VAR)) return varDeclaration()
+            if (match(FUN)) return function("function")
+            if (match(VAR)) return varDeclaration()
             return statement()
         } catch (error : ParseError) {
             synchronize()
@@ -201,6 +232,26 @@ class Parser(val tokens: List<Token>) {
         return ExpressionStmt(expr)
     }
 
+    fun function(kind: String) : FunctionStmt {
+        val name = consume(IDENTIFIER, "Expect $kind name.")
+
+        consume(LEFT_PAREN, "Expect '(' after $kind name.")
+        val parameters = ArrayList<Token>()
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (parameters.size >= 255) {
+                    error(peek(), "Can't have more than 255 parameters")
+                }
+                parameters.add(consume(IDENTIFIER, "Expect parameter name."))
+            } while (match(COMMA))
+        }
+        consume(RIGHT_PAREN, "Expect ')' after parameters.")
+
+        consume(LEFT_BRACE, "Expect '{' before $kind body.")
+        val body = block()
+        return FunctionStmt(name, parameters, body)
+    }
+
     fun assignment(): Expr {
         val expr = or()
 
@@ -281,7 +332,6 @@ class Parser(val tokens: List<Token>) {
     fun previous() : Token {
         return tokens[current - 1]
     }
-
 
 
     fun error(token: Token, message: String) : ParseError {

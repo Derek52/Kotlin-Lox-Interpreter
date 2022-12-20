@@ -1,4 +1,5 @@
 import java.lang.StringBuilder
+import kotlin.math.exp
 
 fun main() {
     val astPrinter = ASTPrinter()
@@ -31,6 +32,10 @@ class ASTPrinter : Expr.Visitor<String> {
 
     override fun visitBinaryExpr(expr: Binary): String {
         return parenthesize(expr.operator.lexeme, expr.left,  expr.right)
+    }
+
+    override fun visitCallExpr(expr: Call): String {
+        return parenthesize("Call ${expr.paren.lexeme}")
     }
 
     override fun visitLogicalExpr(expr: Logical): String {
