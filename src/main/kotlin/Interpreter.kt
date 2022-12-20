@@ -214,6 +214,15 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         return null
     }
 
+    override fun visitReturnStmt(stmt: ReturnStmt): Void? {
+        var value: Any? = null
+        //stmt.value?.let { value = evaluate(it) }
+        if (stmt.value != null) {
+            value = evaluate(stmt.value)
+        }
+        throw Return(value)
+    }
+
     override fun visitWhileStmt(stmt: WhileStmt): Void? {
         while(isTruthy(evaluate(stmt.condition))) {
             execute(stmt.body)

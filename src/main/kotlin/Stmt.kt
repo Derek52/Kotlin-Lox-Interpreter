@@ -7,6 +7,7 @@ abstract class Stmt() {
 		fun visitVarStmt(stmt: VarStmt) : R
 		fun visitIfStmt(stmt: IfStmt) : R
 		fun visitPrintStmt(stmt: PrintStmt) : R
+		fun visitReturnStmt(stmt: ReturnStmt) : R
 		fun visitWhileStmt(stmt: WhileStmt) : R
 	}
 
@@ -52,6 +53,13 @@ class PrintStmt(val expression: Expr) : Stmt() {
 
 	override fun <R> accept(visitor: Visitor<R>) : R {
 		return visitor.visitPrintStmt(this)
+	}
+}
+
+class ReturnStmt(val keyword: Token, val value: Expr?) : Stmt() {
+
+	override fun <R> accept(visitor: Visitor<R>) : R {
+		return visitor.visitReturnStmt(this)
 	}
 }
 

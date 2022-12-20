@@ -144,6 +144,7 @@ class Parser(val tokens: List<Token>) {
         if (match(FOR)) return forStatement()
         if (match(IF)) return ifStatement()
         if (match(PRINT)) return printStatement()
+        if (match(RETURN)) return returnStatement()
         if (match(WHILE)) return whileStatement()
         if (match(LEFT_BRACE)) return BlockStmt(block())
 
@@ -296,6 +297,17 @@ class Parser(val tokens: List<Token>) {
         val value = expression()
         consume(SEMICOLON, "Expect ';' after value.")
         return PrintStmt(value)
+    }
+
+    fun returnStatement() : Stmt {
+        val keyword = previous()
+        var value : Expr? = null
+        if (!check(SEMICOLON)) {
+            value = expression()
+        }
+
+        consume(SEMICOLON, "Expect ';' after return value.")
+        return ReturnStmt(keyword, value)
     }
 
     fun varDeclaration() : Stmt {
