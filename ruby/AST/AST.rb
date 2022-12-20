@@ -38,7 +38,7 @@ exprASTDefinitions = [
 stmtASTDefinitions = [
   "Block      ; val statements: List<Stmt>",
   "Expression ; val expression: Expr",
-  "Function   ; val name: Token, params: List<Token>, val body: List<Stmt>",
+  "Function   ; val name: Token, val params: List<Token>, val body: List<Stmt>",
   "Var        ; val name: Token, val initializer: Expr?",
   "If         ; val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt?",
   "Print      ; val expression: Expr",

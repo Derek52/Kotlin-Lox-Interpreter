@@ -2,7 +2,7 @@ import TokenType.*
 
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
-    private val globals = Environment()
+    val globals = Environment()
     private var environment = globals
 
     init {
@@ -11,7 +11,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
                 return 0
             }
 
-            override fun call(interpreter: Interpreter?, arguments: List<Any?>): Any {
+            override fun call(interpreter: Interpreter, arguments: List<Any?>): Any {
                 return System.currentTimeMillis().toDouble() / 1000.0
             }
 
@@ -114,8 +114,6 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
                 return null
             }
         }
-
-        return null
     }
 
     override fun visitCallExpr(expr: Call): Any? {
@@ -176,6 +174,12 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
     override fun visitExpressionStmt(stmt: ExpressionStmt) : Void? {
         evaluate(stmt.expression)
+        return null
+    }
+
+    override fun visitFunctionStmt(stmt: FunctionStmt): Void? {
+        val function = LoxFunction(stmt)
+        environment.define(stmt.name.lexeme, function)
         return null
     }
 

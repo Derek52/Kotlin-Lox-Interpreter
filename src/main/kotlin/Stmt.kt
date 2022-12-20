@@ -27,7 +27,7 @@ class ExpressionStmt(val expression: Expr) : Stmt() {
 	}
 }
 
-class FunctionStmt(val name: Token, params: List<Token>, val body: List<Stmt>) : Stmt() {
+class FunctionStmt(val name: Token, val params: List<Token>, val body: List<Stmt>) : Stmt() {
 
 	override fun <R> accept(visitor: Visitor<R>) : R {
 		return visitor.visitFunctionStmt(this)
