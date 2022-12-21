@@ -4,6 +4,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
     val globals = Environment()
     private var environment = globals
+    val locals = HashMap<Expr, Int>()
 
     init {
         globals.define("clock", object : LoxCallable {
@@ -36,12 +37,30 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
     }
 
     override fun visitVariableExpr(expr: Variable): Any? {
-        return environment.get(expr.name)
+        return lookUpVariable(expr.name, expr)
     }
+
+    fun lookUpVariable(name: Token, expr: Expr) : Any? {
+        val distance :Int? = locals[expr]
+        if (distance != null) {
+            return environment.getAt(distance, name.lexeme)
+        } else {
+            return globals.get(name)
+        }
+    }
+
 
     override fun visitAssignExpr(expr: Assign): Any? {
         val value = evaluate(expr.value)
-        environment.assign(expr.name, value)
+
+        val distance = locals[expr]
+        if (distance != null) {
+            environment.assignAt(distance, expr.name, value)
+        } else {
+            globals.assign(expr.name, value)
+        }
+
+
         return value
     }
 
@@ -157,6 +176,10 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
     fun execute(stmt: Stmt) {
         stmt.accept(this)
+    }
+
+    fun resolve(expr: Expr, depth: Int) {
+        locals.put(expr, depth)
     }
 
     fun executeBlock(statements: List<Stmt>, environment: Environment) {
