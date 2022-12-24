@@ -3,7 +3,7 @@ import java.util.*
 class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visitor<Void?> {
 
     enum class FunctionType {
-        NONE, FUNCTION
+        NONE, FUNCTION, METHOD
     }
 
     val scopes = Stack<HashMap<String, Boolean>>()
@@ -77,9 +77,20 @@ class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visito
         return null
     }
 
+    override fun visitGetExpr(expr: GetExpr): Void? {
+        resolve(expr.loxObject)
+        return null
+    }
+
     override fun visitLogicalExpr(expr: Logical): Void? {
         resolve(expr.left)
         resolve(expr.right)
+        return null
+    }
+
+    override fun visitSetExpr(expr: SetExpr): Void? {
+        resolve(expr.value)
+        resolve(expr.loxObject)
         return null
     }
 
@@ -112,6 +123,18 @@ class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visito
         endScope()
         return null
     }
+
+    override fun visitClassStmt(stmt: ClassStmt): Void? {
+        declare(stmt.name)
+        define(stmt.name)
+
+        for (method in stmt.methods) {
+            val declaration = FunctionType.METHOD
+            resolveFunction(method, declaration)
+        }
+        return null
+    }
+
 
     override fun visitExpressionStmt(stmt: ExpressionStmt): Void? {
         resolve(stmt.expression)

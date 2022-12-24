@@ -28,7 +28,9 @@ exprASTDefinitions = [
   "Assign     ; val name: Token, val value: Expr",
   "Binary     ; val left: Expr, val operator: Token, val right: Expr",
   "Call       ; val callee: Expr, val paren: Token, val arguments: List<Expr>",
+  "Get        ; val loxObject: Expr, val name: Token",
   "Logical    ; val left: Expr, val operator: Token, val right: Expr",
+  "Set        ; val loxObject: Expr, val name: Token, val value: Expr",
   "Grouping   ; val expression: Expr",
   "Literal    ; val value: Any?",
   "Unary      ; val operator: Token, val right: Expr",
@@ -37,6 +39,7 @@ exprASTDefinitions = [
 
 stmtASTDefinitions = [
   "Block      ; val statements: List<Stmt>",
+  "Class      ; val name: Token, val methods: List<FunctionStmt>",
   "Expression ; val expression: Expr",
   "Function   ; val name: Token, val params: List<Token>, val body: List<Stmt>",
   "Var        ; val name: Token, val initializer: Expr?",

@@ -144,7 +144,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         }
 
         if (callee !is LoxCallable) {
-            throw RuntimeError(expr.paren, "Can only call functions and clssses.")
+            throw RuntimeError(expr.paren, "Can only call functions and classes.")
         }
 
         val function = callee as LoxCallable
@@ -152,6 +152,14 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
             throw RuntimeError(expr.paren, "Expected ${function.arity()} arguments but got ${arguments.size}.")
         }
         return function.call(this, arguments)
+    }
+
+    override fun visitGetExpr(expr: GetExpr): Any? {
+        val loxObject = evaluate(expr.loxObject)
+        if (loxObject is LoxInstance) {
+            return loxObject.get(expr.name)
+        }
+        throw RuntimeError(expr.name, "Only instances have properties.")
     }
 
     override fun visitLogicalExpr(expr: Logical): Any? {
@@ -164,6 +172,18 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         }
 
         return evaluate(expr.right)
+    }
+
+    override fun visitSetExpr(expr: SetExpr): Any? {
+        val loxObject = evaluate(expr.loxObject)
+
+        if (loxObject !is LoxInstance) {
+            throw RuntimeError(expr.name, "Only instances have fields.")
+        }
+
+        val value = evaluate(expr.value)
+        loxObject.set(expr.name, value)
+        return value
     }
 
     override fun visitGroupingExpr(expr: Grouping): Any? {
@@ -208,6 +228,19 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
     override fun visitBlockStmt(stmt: BlockStmt): Void? {
         executeBlock(stmt.statements, Environment(environment))
+        return null
+    }
+
+    override fun visitClassStmt(stmt: ClassStmt): Void? {
+        environment.define(stmt.name.lexeme, null)
+
+        val methods = HashMap<String, LoxFunction>()
+        for (method in stmt.methods) {
+            val function = LoxFunction(method, environment)
+            methods[method.name.lexeme] = function
+        }
+        val klass = LoxClass(stmt.name.lexeme, methods)
+        environment.assign(stmt.name, klass)
         return null
     }
 

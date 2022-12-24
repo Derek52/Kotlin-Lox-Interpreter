@@ -35,8 +35,16 @@ class ASTPrinter : Expr.Visitor<String> {
         return parenthesize("Call ${expr.paren.lexeme}")
     }
 
+    override fun visitGetExpr(expr: GetExpr): String {
+        return parenthesize("getExpr")
+    }
+
     override fun visitLogicalExpr(expr: Logical): String {
         return parenthesize(expr.operator.lexeme)
+    }
+
+    override fun visitSetExpr(expr: SetExpr): String {
+        return parenthesize("stetExpr")
     }
 
     override fun visitGroupingExpr(expr: Grouping): String {
