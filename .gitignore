@@ -5,3 +5,7 @@ ruby/AST/AST.iml
 .idea/libraries/
 .idea/modules/
 .idea/.name
+.idea/vcs.xml
+.idea/gradle.xml
+.idea/misc.xml
+.idea/codeStyles/Project.xml
