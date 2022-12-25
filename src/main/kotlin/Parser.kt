@@ -114,6 +114,13 @@ class Parser(val tokens: List<Token>) {
             return Literal(previous().literal)
         }
 
+        if (match(SUPER)) {
+            val keyword = previous()
+            consume(DOT, "Expect '.' after 'super'.")
+            val method = consume(IDENTIFIER, "Expect superclass method name.")
+            return Super(keyword, method)
+        }
+
         if(match(THIS)) {
             return This(previous())
         }
@@ -149,6 +156,11 @@ class Parser(val tokens: List<Token>) {
 
     fun classDeclaration() : Stmt {
         val name = consume(IDENTIFIER, "Expect class name")
+        var superClass: Variable? = null
+        if (match(LESS)) {
+            consume(IDENTIFIER, "Expect superclass name.")
+            superClass = Variable(previous())
+        }
         consume(LEFT_BRACE, "Expect '{' before class body.")
 
         val methods = ArrayList<FunctionStmt>()
@@ -157,7 +169,7 @@ class Parser(val tokens: List<Token>) {
         }
 
         consume(RIGHT_BRACE, "Expect '}' after class body.")
-        return ClassStmt(name, methods)
+        return ClassStmt(name, superClass, methods)
     }
 
     fun statement() : Stmt {

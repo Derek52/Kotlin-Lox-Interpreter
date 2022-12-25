@@ -7,6 +7,7 @@ abstract class Expr() {
 		fun visitGetExpr(expr: GetExpr) : R
 		fun visitLogicalExpr(expr: Logical) : R
 		fun visitSetExpr(expr: SetExpr) : R
+		fun visitSuperExpr(expr: Super) : R
 		fun visitThisExpr(expr: This) : R
 		fun visitGroupingExpr(expr: Grouping) : R
 		fun visitLiteralExpr(expr: Literal) : R
@@ -56,6 +57,13 @@ class SetExpr(val loxObject: Expr, val name: Token, val value: Expr) : Expr() {
 
 	override fun <R> accept(visitor: Visitor<R>) : R {
 		return visitor.visitSetExpr(this)
+	}
+}
+
+class Super(val keyword: Token, val method: Token) : Expr() {
+
+	override fun <R> accept(visitor: Visitor<R>) : R {
+		return visitor.visitSuperExpr(this)
 	}
 }
 

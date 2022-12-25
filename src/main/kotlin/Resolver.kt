@@ -3,7 +3,7 @@ import java.util.*
 class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visitor<Void?> {
 
     enum class ClassType {
-        NONE, CLASS
+        NONE, CLASS, SUBCLASS
     }
     private var currentClass = ClassType.NONE
 
@@ -99,6 +99,17 @@ class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visito
         return null
     }
 
+    override fun visitSuperExpr(expr: Super): Void? {
+        if (currentClass == ClassType.NONE) {
+            KLox.error(expr.keyword, "Can't use 'super' outside of a class.")
+        } else if (currentClass != ClassType.SUBCLASS) {
+            KLox.error(expr.keyword, "Can't use 'super' in a class with no superclass.")
+        }
+
+        resolveLocal(expr, expr.keyword)
+        return null
+    }
+
     override fun visitThisExpr(expr: This): Void? {
         if (currentClass == ClassType.NONE) {
             KLox.error(expr.keyword, "Can't use 'this' outside of a class.")
@@ -144,6 +155,16 @@ class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visito
 
         declare(stmt.name)
         define(stmt.name)
+        stmt.superClass?.let {
+            if (stmt.superClass.name.lexeme == stmt.name.lexeme) {
+                KLox.error(stmt.superClass.name, "A class can not inherit from itself.")
+            }
+            currentClass = ClassType.SUBCLASS
+            resolve(stmt.superClass)
+
+            beginScope()
+            scopes.peek()["super"] = true
+        }
 
         beginScope()
         scopes.peek()["this"] = true
@@ -158,6 +179,7 @@ class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visito
         }
 
         endScope()
+        stmt.superClass?.let { endScope() }
         currentClass = enclosingClass
         return null
     }

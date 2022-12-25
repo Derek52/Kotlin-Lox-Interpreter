@@ -44,7 +44,11 @@ class ASTPrinter : Expr.Visitor<String> {
     }
 
     override fun visitSetExpr(expr: SetExpr): String {
-        return parenthesize("stetExpr")
+        return parenthesize("setExpr")
+    }
+
+    override fun visitSuperExpr(expr: Super): String {
+        return parenthesize("super")
     }
 
     override fun visitThisExpr(expr: This): String {

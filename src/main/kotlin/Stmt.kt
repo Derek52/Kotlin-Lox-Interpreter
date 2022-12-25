@@ -22,7 +22,7 @@ class BlockStmt(val statements: List<Stmt>) : Stmt() {
 	}
 }
 
-class ClassStmt(val name: Token, val methods: List<FunctionStmt>) : Stmt() {
+class ClassStmt(val name: Token, val superClass: Variable?, val methods: List<FunctionStmt>) : Stmt() {
 
 	override fun <R> accept(visitor: Visitor<R>) : R {
 		return visitor.visitClassStmt(this)

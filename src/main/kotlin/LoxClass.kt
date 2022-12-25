@@ -1,8 +1,12 @@
-class LoxClass(val name: String, val methods: HashMap<String, LoxFunction>) : LoxCallable{
+class LoxClass(val name: String, val superClass: LoxClass?,
+               val methods: HashMap<String, LoxFunction>) : LoxCallable{
 
     fun findMethod(name: String) : LoxFunction? {
         if (methods.containsKey(name)) {
            return methods[name]
+        }
+        superClass?.let {
+            return superClass.findMethod(name)
         }
         return null
     }
