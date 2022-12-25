@@ -2,3 +2,6 @@ build/
 .gradle/
 ruby/AST/AST.iml
 .idea/modules.xml
+.idea/libraries/
+.idea/modules/
+.idea/.name
