@@ -114,6 +114,10 @@ class Parser(val tokens: List<Token>) {
             return Literal(previous().literal)
         }
 
+        if(match(THIS)) {
+            return This(previous())
+        }
+
         if (match(IDENTIFIER)) {
             return Variable(previous())
         }

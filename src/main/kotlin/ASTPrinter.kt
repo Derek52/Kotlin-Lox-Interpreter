@@ -47,6 +47,10 @@ class ASTPrinter : Expr.Visitor<String> {
         return parenthesize("stetExpr")
     }
 
+    override fun visitThisExpr(expr: This): String {
+        return parenthesize("this")
+    }
+
     override fun visitGroupingExpr(expr: Grouping): String {
         return parenthesize("group", expr.expression)
     }

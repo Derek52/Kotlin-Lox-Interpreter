@@ -2,8 +2,13 @@ import java.util.*
 
 class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visitor<Void?> {
 
+    enum class ClassType {
+        NONE, CLASS
+    }
+    private var currentClass = ClassType.NONE
+
     enum class FunctionType {
-        NONE, FUNCTION, METHOD
+        NONE, FUNCTION, METHOD, INITIALIZER
     }
 
     val scopes = Stack<HashMap<String, Boolean>>()
@@ -94,6 +99,15 @@ class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visito
         return null
     }
 
+    override fun visitThisExpr(expr: This): Void? {
+        if (currentClass == ClassType.NONE) {
+            KLox.error(expr.keyword, "Can't use 'this' outside of a class.")
+            return null
+        }
+        resolveLocal(expr, expr.keyword)
+        return null
+    }
+
     override fun visitGroupingExpr(expr: Grouping): Void? {
         resolve(expr.expression)
         return null
@@ -125,13 +139,26 @@ class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visito
     }
 
     override fun visitClassStmt(stmt: ClassStmt): Void? {
+        var enclosingClass = currentClass
+        currentClass = ClassType.CLASS
+
         declare(stmt.name)
         define(stmt.name)
 
+        beginScope()
+        scopes.peek()["this"] = true
+
         for (method in stmt.methods) {
-            val declaration = FunctionType.METHOD
+            val declaration = if (method.name.lexeme == "init") {
+                FunctionType.INITIALIZER
+            } else {
+                FunctionType.METHOD
+            }
             resolveFunction(method, declaration)
         }
+
+        endScope()
+        currentClass = enclosingClass
         return null
     }
 
@@ -190,6 +217,9 @@ class Resolver(val interpreter: Interpreter) :  Expr.Visitor<Void?>, Stmt.Visito
             KLox.error(stmt.keyword, "Can't return from top-level code.")
         }
         stmt.value?.let { returnValue ->
+            if (currentFunction == FunctionType.INITIALIZER) {
+                KLox.error(stmt.keyword, "Can't return a value from an initializer")
+            }
             resolve(returnValue)
         }
         return null

@@ -186,6 +186,10 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
         return value
     }
 
+    override fun visitThisExpr(expr: This): Any? {
+        return lookUpVariable(expr.keyword, expr)
+    }
+
     override fun visitGroupingExpr(expr: Grouping): Any? {
         return evaluate(expr.expression)
     }
@@ -236,7 +240,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Void?> {
 
         val methods = HashMap<String, LoxFunction>()
         for (method in stmt.methods) {
-            val function = LoxFunction(method, environment)
+            val function = LoxFunction(method, environment, method.name.lexeme == "init")
             methods[method.name.lexeme] = function
         }
         val klass = LoxClass(stmt.name.lexeme, methods)

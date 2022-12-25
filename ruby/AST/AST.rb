@@ -31,6 +31,7 @@ exprASTDefinitions = [
   "Get        ; val loxObject: Expr, val name: Token",
   "Logical    ; val left: Expr, val operator: Token, val right: Expr",
   "Set        ; val loxObject: Expr, val name: Token, val value: Expr",
+  "This       ; val keyword: Token",
   "Grouping   ; val expression: Expr",
   "Literal    ; val value: Any?",
   "Unary      ; val operator: Token, val right: Expr",

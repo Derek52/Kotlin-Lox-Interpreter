@@ -9,10 +9,19 @@ class LoxClass(val name: String, val methods: HashMap<String, LoxFunction>) : Lo
 
     override fun call(interpreter: Interpreter, arguments: List<Any?>): Any? {
         val instance = LoxInstance(this)
+        val initializer = findMethod("init")
+        initializer?.let {
+            initializer.bind(instance).call(interpreter, arguments)
+        }
+
         return instance
     }
 
     override fun arity(): Int {
+        val initializer = findMethod("init")
+        initializer?.let { init ->
+            return init.arity()
+        }
         return 0
     }
 
